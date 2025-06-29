@@ -13,7 +13,7 @@ enum Role {
 }
 
 model user {
-    id          String     @id @db.Uuid
+    id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
     email       String     @unique @db.VarChar
     password    String      
     role        Role       @default(USER)
@@ -29,7 +29,7 @@ model user {
 }
 
 model bbs_post {
-    id          String      @id @db.Uuid
+    id          String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
     title       String      @db.VarChar(255)
     content     String      @db.Text
 
@@ -46,7 +46,7 @@ model bbs_post {
 }
 
 model bbs_comments {
-    id                String          @id @db.Uuid
+    id                String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
     content           String          @db.Text
 
     created_at        DateTime        @db.Timestamptz

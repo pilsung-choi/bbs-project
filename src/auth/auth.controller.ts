@@ -16,8 +16,13 @@ import { Authorization } from './decorator/authorization.decoration';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
+  @Post('register')
   register(@Authorization() token: string) {
     return this.authService.register(token);
+  }
+
+  @Post('login')
+  login(@Authorization() token: string) {
+    return this.authService.login(token);
   }
 }
