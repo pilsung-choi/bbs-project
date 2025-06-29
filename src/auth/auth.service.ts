@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from '@/common/prisma.service';
@@ -9,6 +13,16 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
   async register(createUserDto: CreateUserDto) {
     const { email, password, nickname } = createUserDto;
+
+    // const exitsUser = await this.prisma.user.findUnique({
+    //   where: {
+    //     email,
+    //   },
+    // });
+
+    // if (exitsUser) {
+    //   throw new ConflictException('이미 존재하는 유저입니다.');
+    // }
 
     return this.prisma.user.create({
       data: {
