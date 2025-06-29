@@ -2,19 +2,19 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from '@/common/prisma.service';
+import { CreateUserDto } from '@/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
-  async register(token: string) {
-    const { email, password } = this.parseBasicToken(token);
+  async register(createUserDto: CreateUserDto) {
+    const { email, password, nickname } = createUserDto;
 
     return this.prisma.user.create({
       data: {
-        id: '134',
         email,
         password,
-        nickname: 'default',
+        nickname,
       },
     });
   }
