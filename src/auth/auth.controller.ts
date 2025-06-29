@@ -13,6 +13,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Authorization } from './decorator/authorization.decoration';
 import { CreateUserRequestDto } from '@/user/dto/create-user.dto';
 import {
+  ApiBasicAuth,
   ApiCreatedResponse,
   ApiOperation,
   ApiResponse,
@@ -37,6 +38,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiBasicAuth()
   login(@Authorization() token: string) {
     return this.authService.login(token);
   }

@@ -3,27 +3,58 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@/common/prisma.service';
 import { CreateUserRequestDto } from '@/user/dto/create-user.dto';
 import { UserService } from '@/user/user.service';
+import { ConfigService } from '@nestjs/config';
+import { envVariableKeys } from '@/common/const/env.const';
+import { Role } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
   ) {}
   async register(createUserDto: CreateUserRequestDto) {
     const { email, password, nickname } = createUserDto;
-    //
 
     return this.userService.create({ email, password, nickname });
   }
 
-  login(token: string) {
-    return;
+  async login(token: string) {
+    const { email, password } = this.parseBasicToken(token);
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        password: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('잘못된 로그인 정보입니다.');
+    }
+
+    const passOk = await bcrypt.compare(password, user.password);
+    console.log(passOk);
+
+    if (!passOk) {
+      throw new BadRequestException('잘못된 로그인 정보입니다.');
+    }
+
+    return {
+      refreshToken: await this.issueToken(user, true),
+      accessToken: await this.issueToken(user, false),
+    };
   }
 
   parseBasicToken(rawToken: string) {
@@ -53,6 +84,27 @@ export class AuthService {
       email,
       password,
     };
+  }
+
+  async issueToken(user: { id: string; role: Role }, isRefreshToken: boolean) {
+    const refreshToken = this.configService.get<string>(
+      envVariableKeys.refreshTokenSecret,
+    );
+    const accessToken = this.configService.get<string>(
+      envVariableKeys.accessTokenSecret,
+    );
+
+    return await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        role: user.role,
+        type: isRefreshToken ? 'refresh' : 'access',
+      },
+      {
+        secret: isRefreshToken ? refreshToken : accessToken,
+        expiresIn: isRefreshToken ? '24h' : '1h',
+      },
+    );
   }
 
   // create(createAuthDto: CreateAuthDto) {
