@@ -27,5 +27,12 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         message,
       });
     }
+
+    // res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    //   statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    //   timestamp: new Date().toISOString(),
+    //   path: req.url,
+    //   message,
+    // });
   }
 }

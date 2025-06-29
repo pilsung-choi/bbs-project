@@ -11,7 +11,7 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Authorization } from './decorator/authorization.decoration';
-import { CreateUserDto } from '@/user/dto/create-user.dto';
+import { CreateUserRequestDto } from '@/user/dto/create-user.dto';
 import {
   ApiCreatedResponse,
   ApiOperation,
@@ -32,7 +32,7 @@ export class AuthController {
     status: 201,
     description: '사용자가 성공적으로 생성 됐을 때',
   })
-  register(@Body() createUserDto: CreateUserDto) {
+  register(@Body() createUserDto: CreateUserRequestDto) {
     return this.authService.register(createUserDto);
   }
 

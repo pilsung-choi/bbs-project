@@ -4,12 +4,11 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
 
-export class CreateUserDto {
+export class CreateUserRequestDto {
   @ApiProperty({
     description: '사용자 이메일',
     example: 'test@gmail.com',
@@ -44,3 +43,5 @@ export function IsValidPassword() {
     MaxLength(20, { message: '비밀번호는 최대 20자 입니다.' }),
   );
 }
+
+export class CreateUserResponseDto {}

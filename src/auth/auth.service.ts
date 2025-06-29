@@ -6,31 +6,20 @@ import {
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from '@/common/prisma.service';
-import { CreateUserDto } from '@/user/dto/create-user.dto';
+import { CreateUserRequestDto } from '@/user/dto/create-user.dto';
+import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
-  async register(createUserDto: CreateUserDto) {
+  constructor(
+    private readonly userService: UserService,
+    private readonly prisma: PrismaService,
+  ) {}
+  async register(createUserDto: CreateUserRequestDto) {
     const { email, password, nickname } = createUserDto;
+    //
 
-    // const exitsUser = await this.prisma.user.findUnique({
-    //   where: {
-    //     email,
-    //   },
-    // });
-
-    // if (exitsUser) {
-    //   throw new ConflictException('이미 존재하는 유저입니다.');
-    // }
-
-    return this.prisma.user.create({
-      data: {
-        email,
-        password,
-        nickname,
-      },
-    });
+    return this.userService.create({ email, password, nickname });
   }
 
   login(token: string) {
