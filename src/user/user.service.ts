@@ -1,9 +1,11 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateUserRequestDto } from './dto/create-user.dto';
+import {
+  CreateUserRequestDto,
+  CreateUserResponse,
+} from './dto/create-user.dto';
 import { PrismaService } from '@/common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { env } from 'process';
 import { envVariableKeys } from '@/common/const/env.const';
 
 @Injectable()
@@ -12,7 +14,9 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {}
-  async create(createUserRequestDto: CreateUserRequestDto) {
+  async create(
+    createUserRequestDto: CreateUserRequestDto,
+  ): Promise<CreateUserResponse> {
     const { email, password, nickname } = createUserRequestDto;
 
     const exitsUser = await this.prisma.user.findUnique({
@@ -30,7 +34,7 @@ export class UserService {
       this.configService.get<number>(envVariableKeys.hashRounds)!,
     );
 
-    await this.prisma.user.create({
+    const newUser = await this.prisma.user.create({
       data: {
         email,
         password: hash,
@@ -38,11 +42,7 @@ export class UserService {
       },
     });
 
-    return this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    return CreateUserResponse.of(newUser);
   }
 
   findAll() {

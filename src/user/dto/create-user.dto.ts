@@ -1,5 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
+import { PrismaClient, Role, user } from '@prisma/client';
 import {
   IsEmail,
   IsNotEmpty,
@@ -44,4 +45,61 @@ export function IsValidPassword() {
   );
 }
 
-export class CreateUserResponseDto {}
+export class CreateUserResponse {
+  @ApiProperty({
+    description: '사용자 UUID ',
+    example: '302863ba-9523-4ede-9147-5988f7a05d9d',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: '사용자 이메일',
+    example: 'test@gmail.com',
+    maxLength: 16,
+    minLength: 8,
+  })
+  email: string;
+
+  @ApiProperty({
+    description: '사용자 권한',
+    example: Role.USER,
+    enum: Object.values(Role),
+  })
+  role: Role;
+
+  @ApiProperty({
+    description: '사용자 닉네임 ',
+    example: '포르도',
+  })
+  nickname: string;
+
+  @ApiProperty({
+    description: '계정 생성 시간',
+    example: '2025-06-29T20:42:48.545Z',
+  })
+  created_at: Date;
+
+  @ApiProperty({
+    description: '계정 수정 시간',
+    example: '2025-06-29T20:42:48.545Z',
+  })
+  updated_at: Date;
+
+  @ApiProperty({
+    description: '계정 삭제 시간',
+    example: '2025-06-29T20:42:48.545Z',
+  })
+  deleted_at?: Date | null;
+
+  static of(user: user): CreateUserResponse {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      nickname: user.nickname,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      deleted_at: user.deleted_at ?? null,
+    };
+  }
+}

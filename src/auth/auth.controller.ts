@@ -8,14 +8,18 @@ import {
   Delete,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { loginResponseDto } from './dto/login.dto';
 import { Authorization } from './decorator/authorization.decoration';
-import { CreateUserRequestDto } from '@/user/dto/create-user.dto';
+import {
+  CreateUserRequestDto,
+  CreateUserResponse,
+} from '@/user/dto/create-user.dto';
 import {
   ApiBasicAuth,
   ApiCreatedResponse,
+  ApiHeader,
   ApiOperation,
+  ApiProperty,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -32,14 +36,25 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: '사용자가 성공적으로 생성 됐을 때',
+    type: CreateUserResponse,
   })
-  register(@Body() createUserDto: CreateUserRequestDto) {
+  register(
+    @Body() createUserDto: CreateUserRequestDto,
+  ): Promise<CreateUserResponse> {
     return this.authService.register(createUserDto);
   }
 
   @Post('login')
+  @ApiOperation({
+    summary: '로그인 API',
+  })
   @ApiBasicAuth()
-  login(@Authorization() token: string) {
+  @ApiResponse({
+    status: 200,
+    description: '로그인 성공',
+    type: loginResponseDto,
+  })
+  login(@Authorization() token: string): Promise<loginResponseDto> {
     return this.authService.login(token);
   }
 }

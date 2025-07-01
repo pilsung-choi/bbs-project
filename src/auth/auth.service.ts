@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from '@/common/const/env.const';
 import { Role } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { loginResponseDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,7 @@ export class AuthService {
     return this.userService.create({ email, password, nickname });
   }
 
-  async login(token: string) {
+  async login(token: string): Promise<loginResponseDto> {
     const { email, password } = this.parseBasicToken(token);
 
     const user = await this.prisma.user.findUnique({
@@ -45,7 +46,6 @@ export class AuthService {
     }
 
     const passOk = await bcrypt.compare(password, user.password);
-    console.log(passOk);
 
     if (!passOk) {
       throw new BadRequestException('잘못된 로그인 정보입니다.');
