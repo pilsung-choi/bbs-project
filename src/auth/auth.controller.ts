@@ -23,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Public } from './decorator/public.decotator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -30,6 +31,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Public()
   @ApiOperation({
     summary: '유저 생성 API',
   })
@@ -45,6 +47,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @ApiOperation({
     summary: '로그인 API',
   })

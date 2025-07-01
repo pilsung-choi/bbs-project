@@ -47,6 +47,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
       secret: this.configService.get<string>(secretKey)!,
     });
 
+    console.log('payload', payload);
     req.user = payload;
 
     next();
