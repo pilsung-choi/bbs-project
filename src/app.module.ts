@@ -1,15 +1,23 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { BbsModule } from './bbs/bbs.module';
 import { CommonModule } from './common/common.module';
 import { PrismaService } from './common/prisma.service';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseTimeInterceptor } from './common/interceptor/response-time.interceptor';
 import { PrismaExceptionFilter } from './common/filter/query-failed.filter';
 import { GlobalExceptionFilter } from './common/filter/global-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { RBACGuard } from './auth/guard/rbac.guard';
+import { BearerTokenMiddleware } from './common/middleware/bearer-token.middleware';
+import { AuthGuard } from './auth/guard/auth.guard';
 
 @Module({
   imports: [
@@ -32,6 +40,14 @@ import * as Joi from 'joi';
   controllers: [],
   providers: [
     {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RBACGuard,
+    },
+    {
       provide: APP_INTERCEPTOR,
       useClass: ResponseTimeInterceptor,
     },
@@ -46,4 +62,20 @@ import * as Joi from 'joi';
     PrismaService,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(BearerTokenMiddleware)
+      .exclude(
+        {
+          path: 'auth/login',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'auth/register',
+          method: RequestMethod.POST,
+        },
+      )
+      .forRoutes('*');
+  }
+}

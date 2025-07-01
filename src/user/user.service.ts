@@ -46,7 +46,7 @@ export class UserService {
   }
 
   findAll() {
-    return `This action returns all user`;
+    return '통과';
   }
 
   findOne(id: number) {
