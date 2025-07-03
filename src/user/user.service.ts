@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { envVariableKeys } from '@/common/const/env.const';
 import { GetUserResponse } from './dto/get-users.dto';
+import { UserNotFoundException } from '@/common/exception/user.exceptions';
 
 @Injectable()
 export class UserService {
@@ -48,7 +49,7 @@ export class UserService {
 
   async findAll(): Promise<GetUserResponse[]> {
     const users = await this.prisma.user.findMany();
-    return GetUserResponse.of(users);
+    return users.map((user) => new GetUserResponse(user));
   }
 
   async findMe(userId: string): Promise<GetUserResponse> {
@@ -59,10 +60,10 @@ export class UserService {
     });
 
     if (!user) {
-      throw new ConflictException('존재하지 않는 유저입니다.');
+      throw new UserNotFoundException('존재하지 않은 사용자입니다.');
     }
 
-    return GetUserResponse.of(user);
+    return new GetUserResponse(user);
   }
 
   update(id: number, updateUserDto) {

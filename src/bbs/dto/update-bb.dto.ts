@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateBbDto } from './create-bb.dto';
+import { CreateBbsRequestDto } from './create-bbs.dto';
 
-export class UpdateBbDto extends PartialType(CreateBbDto) {}
+export class UpdateBbDto extends PartialType(CreateBbsRequestDto) {}

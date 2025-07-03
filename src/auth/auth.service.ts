@@ -28,7 +28,6 @@ export class AuthService {
   }
 
   async login(token: string): Promise<loginResponseDto> {
-    console.log('token', token);
     const { email, password } = this.parseBasicToken(token);
 
     const user = await this.prisma.user.findUnique({

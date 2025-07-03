@@ -18,6 +18,7 @@ import * as Joi from 'joi';
 import { RBACGuard } from './auth/guard/rbac.guard';
 import { BearerTokenMiddleware } from './common/middleware/bearer-token.middleware';
 import { AuthGuard } from './auth/guard/auth.guard';
+import { CamelCaseInterceptor } from './common/interceptor/camelcase.interceptor';
 
 @Module({
   imports: [
@@ -49,15 +50,19 @@ import { AuthGuard } from './auth/guard/auth.guard';
     },
     {
       provide: APP_INTERCEPTOR,
+      useClass: CamelCaseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
       useClass: ResponseTimeInterceptor,
     },
     {
       provide: APP_FILTER,
-      useClass: GlobalExceptionFilter,
+      useClass: PrismaExceptionFilter,
     },
     {
       provide: APP_FILTER,
-      useClass: PrismaExceptionFilter,
+      useClass: GlobalExceptionFilter,
     },
     PrismaService,
   ],

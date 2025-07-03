@@ -77,19 +77,19 @@ export class CreateUserResponse {
     description: '계정 생성 시간',
     example: '2025-06-29T20:42:48.545Z',
   })
-  created_at: Date;
+  createdAt: Date;
 
   @ApiProperty({
     description: '계정 수정 시간',
     example: '2025-06-29T20:42:48.545Z',
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @ApiProperty({
     description: '계정 삭제 시간',
     example: '2025-06-29T20:42:48.545Z',
   })
-  deleted_at?: Date | null;
+  deletedAt?: Date | null;
 
   static of(user: user): CreateUserResponse {
     return {
@@ -97,9 +97,9 @@ export class CreateUserResponse {
       email: user.email,
       role: user.role,
       nickname: user.nickname,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-      deleted_at: user.deleted_at ?? null,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+      deletedAt: user.deleted_at ?? null,
     };
   }
 }

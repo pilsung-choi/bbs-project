@@ -8,6 +8,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Request, Response, NextFunction } from 'express';
 import { envVariableKeys } from '../const/env.const';
 import { ConfigService } from '@nestjs/config';
+import {
+  ExpiredTokenException,
+  InvalidTokenException,
+  TokenTypeException,
+} from '../exception/auth.exception';
 
 declare global {
   namespace Express {
@@ -35,22 +40,32 @@ export class BearerTokenMiddleware implements NestMiddleware {
     const decodedPayload = await this.jwtService.decode(token);
 
     if (decodedPayload.type !== 'refresh' && decodedPayload.type !== 'access') {
-      throw new UnauthorizedException('잘못된 토큰입니다.');
+      throw new TokenTypeException();
     }
 
-    const secretKey =
-      decodedPayload.type === 'refresh'
-        ? envVariableKeys.refreshTokenSecret
-        : envVariableKeys.accessTokenSecret;
+    try {
+      const secretKey =
+        decodedPayload.type === 'refresh'
+          ? envVariableKeys.refreshTokenSecret
+          : envVariableKeys.accessTokenSecret;
 
-    const payload = await this.jwtService.verifyAsync(token, {
-      secret: this.configService.get<string>(secretKey)!,
-    });
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>(secretKey)!,
+      });
 
-    console.log('payload', payload);
-    req.user = payload;
+      req.user = payload;
 
-    next();
+      next();
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new ExpiredTokenException();
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new InvalidTokenException();
+      }
+
+      throw new UnauthorizedException('인증에 실패했습니다.');
+    }
   }
 
   validateBearerToken(rawToken: string) {

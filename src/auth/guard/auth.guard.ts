@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Public } from '../decorator/public.decotator';
+import { InvalidTokenException } from '@/common/exception/auth.exception';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,7 +18,10 @@ export class AuthGuard implements CanActivate {
     // 요청에서 user 객체가 존재하는지 확인
     const request = context.switchToHttp().getRequest();
     if (!request.user || request.user.type !== 'access') {
-      return false;
+      // console.log('refresh면 여기서 걸림');
+      throw new InvalidTokenException(
+        'request.user가 없거나 access가 아닙니다.',
+      );
     }
 
     return true;

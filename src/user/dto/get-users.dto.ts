@@ -33,34 +33,28 @@ export class GetUserResponse {
     description: '계정 생성 시간',
     example: '2025-06-29T20:42:48.545Z',
   })
-  created_at: Date;
+  createdAt: Date;
 
   @ApiProperty({
     description: '계정 수정 시간',
     example: '2025-06-29T20:42:48.545Z',
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @ApiProperty({
     description: '계정 삭제 시간',
     example: '2025-06-29T20:42:48.545Z',
   })
-  deleted_at?: Date | null;
+  deletedAt?: Date | null;
 
-  static of(user: user): GetUserResponse;
-  static of(users: user[]): GetUserResponse[];
+  constructor(partial?: Partial<GetUserResponse>) {
+    if (partial) Object.assign(this, partial);
+  }
+
   static of(input: user | user[]): GetUserResponse | GetUserResponse[] {
     if (Array.isArray(input)) {
-      return input.map((user) => GetUserResponse.of(user));
+      return input.map((user) => new GetUserResponse(user));
     }
-    return {
-      id: input.id,
-      email: input.email,
-      role: input.role,
-      nickname: input.nickname,
-      created_at: input.created_at,
-      updated_at: input.updated_at,
-      deleted_at: input.deleted_at ?? null,
-    };
+    return new GetUserResponse(input);
   }
 }

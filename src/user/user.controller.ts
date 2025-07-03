@@ -21,6 +21,8 @@ import {
 import { Authorization } from '@/auth/decorator/authorization.decoration';
 import { GetUserResponse } from './dto/get-users.dto';
 import { CurrentUserId } from './decorator/current-user-id.decorator';
+import { ApiErrorResponse } from '@/common/decorator/api-error-response.decorator';
+import { UserNotFoundException } from '@/common/exception/user.exceptions';
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -47,6 +49,11 @@ export class UserController {
     summary: '사용자 (본인) 정보 조회 API',
     description: '사용자 본인의 정보를 조회합니다.',
   })
+  @ApiOkResponse({
+    description: '해당(본인) 유저를 조회합니다.',
+    type: GetUserResponse,
+  })
+  @ApiErrorResponse(UserNotFoundException)
   @ApiBearerAuth()
   @RBAC(Role.USER)
   findMe(@CurrentUserId() userId: string): Promise<GetUserResponse> {

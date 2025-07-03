@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -7,63 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-    ADMIN
-    USER
-}
-
 model user {
-    id          String     @id @default(uuid()) @db.Uuid
-    email       String     @unique @db.VarChar
-    password    String      
-    role        Role       @default(USER)
-    nickname    String     @unique
-
-    created_at  DateTime   @db.Timestamptz @default(now())
-    updated_at  DateTime   @updatedAt
-    deleted_at  DateTime?  @db.Timestamptz
-
-    bbs_post    bbs_post[]
-
-    bbs_comments bbs_comments[]
+  id           String         @id @default(uuid()) @db.Uuid
+  email        String         @unique @db.VarChar
+  password     String
+  role         Role           @default(USER)
+  nickname     String         @unique
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @updatedAt
+  deleted_at   DateTime?      @db.Timestamptz(6)
+  bbs_comments bbs_comments[]
+  bbs_post     bbs_post[]
 }
 
 model bbs_post {
-    id          String      @id @default(uuid()) @db.Uuid
-    title       String      @db.VarChar(255)
-    content     String      @db.Text
+  id         String         @id @default(uuid()) @db.Uuid
+  title      String         @db.VarChar(255)
+  content    String
+  created_at DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at DateTime       @updatedAt
+  deleted_at DateTime?      @db.Timestamptz(6)
+  user_id    String         @db.Uuid
+  comments   bbs_comments[]
+  user       user           @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-    created_at  DateTime    @db.Timestamptz
-    updated_at  DateTime    @updatedAt
-    deleted_at  DateTime?   @db.Timestamptz
-
-    user        user        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    user_id     String      @db.Uuid
-
-    comments bbs_comments[]
-
-    @@index([created_at])
+  @@index([id, created_at])
+  @@unique([id, created_at], name: "bbs_post_id_created_at_key")
 }
 
 model bbs_comments {
-    id                String          @id @default(uuid()) @db.Uuid
-    content           String          @db.Text
+  id         String         @id @default(uuid()) @db.Uuid
+  content    String
+  created_at DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at DateTime       @updatedAt
+  deleted_at DateTime?      @db.Timestamptz(6)
+  user_id    String         @db.Uuid
+  post_id    String         @db.Uuid
+  parent_id  String?        @db.Uuid
+  parent     bbs_comments?  @relation("parent_child", fields: [parent_id], references: [id], onDelete: Cascade)
+  children   bbs_comments[] @relation("parent_child")
+  post       bbs_post       @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       user           @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-    created_at        DateTime        @db.Timestamptz
-    updated_at        DateTime        @updatedAt
-    deleted_at        DateTime?       @db.Timestamptz
+  @@index([post_id, parent_id, created_at])
+}
 
-    user              user            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    user_id           String          @db.Uuid
-
-    post              bbs_post        @relation(fields: [post_id], references: [id], onDelete: Cascade)
-    post_id           String          @db.Uuid
-
-    parent            bbs_comments?   @relation("parent_child", fields: [parent_id], references: [id], onDelete: Cascade)
-    parent_id         String?         @db.Uuid
-
-    children          bbs_comments[]  @relation("parent_child")
-
-
-    @@index([post_id, parent_id, created_at])
+enum Role {
+  ADMIN
+  USER
 }

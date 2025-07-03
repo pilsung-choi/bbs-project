@@ -4,18 +4,19 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest();
     const res = ctx.getResponse();
 
     const { method, originalUrl } = req;
-
-    console.log(`[UncatchedException] ${method} ${originalUrl} `);
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
@@ -29,6 +30,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       } else if (typeof response === 'object' && response !== null) {
         message = (response as any).message;
       }
+      // HttpException(핸들링된 에러) 로그
+      this.logger.warn(
+        `[${method}] ${originalUrl} ${status} - ${JSON.stringify(message)}`,
+      );
+    } else {
+      // 핸들링되지 않은 에러 로그
+      this.logger.error(
+        `[${method}] ${originalUrl} ${status} - ${exception?.stack || exception}`,
+      );
     }
 
     res.status(status).json({
