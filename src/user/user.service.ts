@@ -21,9 +21,9 @@ export class UserService {
   ): Promise<CreateUserResponse> {
     const { email, password, nickname } = createUserRequestDto;
 
-    const exitsUser = await this.prisma.user.findUnique({
+    const exitsUser = await this.prisma.user.findFirst({
       where: {
-        email,
+        OR: [{ email }, { nickname }],
       },
     });
 
@@ -44,7 +44,15 @@ export class UserService {
       },
     });
 
-    return CreateUserResponse.of(newUser);
+    return {
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+      nickname: newUser.nickname,
+      createdAt: newUser.created_at,
+      updatedAt: newUser.updated_at,
+    };
+    // return CreateUserResponse.of(newUser);
   }
 
   async findAll(): Promise<GetUserResponse[]> {
